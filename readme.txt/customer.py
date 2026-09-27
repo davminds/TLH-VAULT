@@ -411,7 +411,7 @@ def addmoney(accno=None):
             bum=(money,accno)
             cur.execute(query,bum)
             cuc.commit()
-            print(f"{money} added to your account")
+        print(f"{money} added to your account")
         cur.close()
         cuc.close()
         select_function()
