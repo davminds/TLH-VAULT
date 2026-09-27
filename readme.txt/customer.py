@@ -1,4 +1,4 @@
-rom tabulate import tabulate as tb
+from tabulate import tabulate as tb
 
 import random as r
 import string as s 
@@ -31,12 +31,12 @@ def create_account():
         while True:
             if email.strip() in existingemail:
                 print("account with this email id already exists please enter another email")
-                email=input("enter your email")
+                email=input("enter your email: ")
             else:
                 print("valid email id")
                 break
         
-        password = input("Enter your password:")
+        password = input("Enter your password: ")
         query = "INSERT INTO CUSTOMERID (accid, name, email, pwd, wallet) VALUES (%s, %s, %s, %s, 0);"
         cur.execute(query, (accno, name, email, password))
         
@@ -111,7 +111,7 @@ def logincustomer():
                 return "done",acc_en
             
         else:
-            ask1=input("would you like to create a new account(1) or exit(anything else)")
+            ask1=input("would you like to create a new account(1) or exit(anything else): ")
             if ask1 == "1":
                 create_account()
                 return
@@ -142,7 +142,7 @@ def select_function():
     while True:
         
         print(tb(functions,headers=["function"],tablefmt="fancy_grid"))
-        ask=int(input("what function would you like to use (enter nos)"))
+        ask=int(input("what function would you like to use (enter nos): "))
         try:
             try:
                 if ask == 1:
@@ -187,9 +187,9 @@ def buygame(a=None):
         cur.execute("select gameno, game_name,price  from games order by gameno")
         ab=cur.fetchall()
         print(tb(ab,headers=header,tablefmt="fancy_grid"))
-        ask=input("enter game no")
+        ask=input("enter game no: ")
     if a=="ringo":
-        ask=input("enter game no")
+        ask=input("enter game no: ")
     else:
         ask=a
     cur.execute("select gameno,game_name,price from games where gameno= %s",(ask,))
@@ -199,7 +199,7 @@ def buygame(a=None):
             print(tb([mdv],headers=["gameno","game name","price"],tablefmt="fancy_grid"))
         
         
-        ask1=input("do you want to confirm purchase?(Y/N)")
+        ask1=input("do you want to confirm purchase?(Y/N): ")
         price=mdv[2]
         if ask1.lower() == "y": 
             cur.execute("select * from cur_cus")
@@ -234,7 +234,7 @@ def buygame(a=None):
                     return
                 else:
                     print("insuffient funds please add money")   
-                    ask2=input("would you like to add money(Y/N)")
+                    ask2=input("would you like to add money(Y/N): ")
                     if ask2.lower() == "y":
                         addmoney()
                         return
@@ -247,7 +247,7 @@ def buygame(a=None):
                 logincustomer()
                 return
         else:
-            ask3=input("would you like to see our other games?(Y/N)")
+            ask3=input("would you like to see our other games?(Y/N): ")
             if ask3.lower() == "y":
                 searchgame()
                 return
@@ -267,22 +267,22 @@ def sellgame():
         print("please login and sell game")
         logincustomer()
         return
-    n=int(input("how many games you want to sell"))
+    n=int(input("how many games you want to sell: "))
     cur.execute("select game_name,price from games")
     abhs=cur.fetchall()
     d=dict(abhs)
     for i in range(n):
-        ask=input("enter game name")
+        ask=input("enter game name: ")
         if ask in d:
             while True:
-                price=int(input("enter asking price"))
+                price=int(input("enter asking price: "))
                 if price>d[ask]:
                     print("sorry, thats unreasonable. please enter a valid price")
                 else:
                     break
         else:
             while True:
-                price=int(input("enter asking price"))
+                price=int(input("enter asking price: "))
                 if price>4500:
                     print("sorry, thats unreasonable. please enter a valid price")
                 else:
@@ -332,10 +332,10 @@ def searchgame():
         ab=cur.fetchall()
         
         print(tb(ab,headers=header,tablefmt="fancy_grid"))
-        ask=input("do you want to see more info on a game?(y/n)")
+        ask=input("do you want to see more info on a game?(y/n): ")
         if ask.lower() == "y":
             while True:
-                j=input('enter gamenumber')
+                j=input('enter gamenumber: ')
                 try:
                     if int(j) not in [row[0] for row in ab]:
                         print("Game number not found.")
@@ -346,12 +346,12 @@ def searchgame():
                 break
             stat=aboutgame(j)
             print(stat)
-            ask1=input("do you wanna buy game?(Y/N)")
+            ask1=input("do you wanna buy game?(Y/N): ")
             if ask1.lower() == "y":
                 buygame(j)
                 return
             else:
-                ask2=input("do you want to continue browsing(y/n)")
+                ask2=input("do you want to continue browsing(y/n): ")
                 if ask2.lower() == "y":
                     searchgame()
                     return
@@ -359,7 +359,7 @@ def searchgame():
                     select_function()
                     return
         else:
-            ask3=input("do you want to buy a game?")
+            ask3=input("do you want to buy a game?: ")
             if ask3.lower()== "y":
                 buygame("ringo")
                 return
@@ -412,7 +412,7 @@ def addmoney(accno=None):
             logincustomer()
             return
     else:
-        money=int(input("enter money to be added"))
+        money=int(input("enter money to be added: "))
         table=["customerid","cur_cus"]
         for i in table:
             query=f"update {i} set wallet=wallet+%s where accid=%s"
@@ -446,13 +446,13 @@ def abtacc():
              ["4)exit"]]
         print("choose an option: ")
         print(tb(ker,headers=["options"],tablefmt="fancy_grid"))
-        ask=int(input("enter option"))
+        ask=int(input("enter option: "))
         while True:
             if ask == 1:
                 addmoney(abba[0])
                 return
             elif ask == 2:
-                newpwd=input("enter new password")
+                newpwd=input("enter new password: ")
                 cur.execute("update customerid set pwd=%s where accid=%s",(newpwd,abba[0]))
                 cur.execute("update cur_cus set pwd=%s where accid=%s",(newpwd,abba[0]))
                 cuc.commit()
@@ -461,7 +461,7 @@ def abtacc():
                 cuc.close()
                 return
             elif ask == 3:
-                newemail=input("enter new email")
+                newemail=input("enter new email: ")
                 cur.execute("update customerid set email=%s where accid=%s",(newemail,abba[0]))
                 cur.execute("update cur_cus set email=%s where accid=%s",(newemail,abba[0]))
                 cuc.commit()
@@ -479,4 +479,5 @@ def abtacc():
         print("please login to see account details")
         logincustomer()
         return
+
 
