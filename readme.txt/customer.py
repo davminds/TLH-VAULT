@@ -152,12 +152,7 @@ def select_function():
                 elif ask == 3:
                     sellgame()
                 elif ask == 4:
-                    cuc,cur= connection_db1()
-                    cur.execute("delete from cur_cus")
-                    cuc.commit()
-                    cur.close()
-                    cuc.close()
-                    return
+                    exit()
                 elif ask == 5:
                     create_account()
                 elif ask == 6:
