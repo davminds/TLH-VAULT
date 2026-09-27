@@ -1,4 +1,4 @@
-from tabulate import tabulate as tb
+rom tabulate import tabulate as tb
 
 import random as r
 import string as s 
@@ -138,10 +138,11 @@ def select_function():
     if abba:
         functions.append(["7) add money"])
         functions.append(["8)see account"])
+        
     while True:
         
         print(tb(functions,headers=["function"],tablefmt="fancy_grid"))
-        ask=int(input("what functionould you like to use (enter nos)"))
+        ask=int(input("what function would you like to use (enter nos)"))
         try:
             try:
                 if ask == 1:
@@ -151,7 +152,12 @@ def select_function():
                 elif ask == 3:
                     sellgame()
                 elif ask == 4:
-                    exit()
+                    cuc,cur= connection_db1()
+                    cur.execute("delete from cur_cus")
+                    cuc.commit()
+                    cur.close()
+                    cuc.close()
+                    return
                 elif ask == 5:
                     create_account()
                 elif ask == 6:
@@ -159,10 +165,7 @@ def select_function():
                 elif ask == 7:
                     addmoney()
                 elif ask == 8:
-                    if abba:
-                        print(tb([abba], headers=['accid ','name','email', 'pwd' ,'wallet'], tablefmt="fancy_grid"))
-                    else:
-                        print("please choose another option")
+                    abtacc()
                 else:
                     print("please choose a valid option")
             except ValueError:
@@ -180,18 +183,27 @@ def select_function():
     
 
     
-def buygame():
+def buygame(a=None):
     cuc,cur= connection_db1()
-    cur.execute("select gameno, game_name,price  from games order by gameno")
-    ab=cur.fetchall()
     
-    print(tb(ab,headers=header,tablefmt="fancy_grid"))
     
-    ask=input("enter game no")
+    
+    if a==None:
+        cur.execute("select gameno, game_name,price  from games order by gameno")
+        ab=cur.fetchall()
+        print(tb(ab,headers=header,tablefmt="fancy_grid"))
+        ask=input("enter game no")
+    if a=="ringo":
+        ask=input("enter game no")
+    else:
+        ask=a
     cur.execute("select gameno,game_name,price from games where gameno= %s",(ask,))
     mdv=cur.fetchone()
     if mdv: # game found
-        print(tb([mdv],headers=["gameno","game name","price"],tablefmt="fancy_grid"))
+        if a==None:
+            print(tb([mdv],headers=["gameno","game name","price"],tablefmt="fancy_grid"))
+        
+        
         ask1=input("do you want to confirm purchase?(Y/N)")
         price=mdv[2]
         if ask1.lower() == "y": 
@@ -216,14 +228,14 @@ def buygame():
                                 t_date) values(%s,"store_01",%s,%s,%s,curdate())''',(accid,mdv[0],mdv[1],price))
                     cuc.commit()
                     ayaan= cur.lastrowid
-                    cur.execute("""select buyer_id,
+                    cur.execute("""select t_id,buyer_id,
                                 seller_id,
                                 product_no,
                                 product_name,
                                 price,
                                 t_date from transactions where t_id = %s """,(ayaan,))
-                    abhinava=cur.fetchone()
-                    print(tb([abhinava],headers=["t_id","buyer_id","seller_id","product_no","product_name","price","t_date"],tablefmt="fancy_grid"))
+                    abva=cur.fetchone()
+                    print(tb([abva],headers=["t_id","buyer_id","seller_id","product_no","product_name","price","t_date"],tablefmt="fancy_grid"))
                     return
                 else:
                     print("insuffient funds please add money")   
@@ -339,9 +351,9 @@ def searchgame():
                 break
             stat=aboutgame(j)
             print(stat)
-            ask1=input("do you wanna buy any game?(Y/N)")
+            ask1=input("do you wanna buy game?(Y/N)")
             if ask1.lower() == "y":
-                buygame()
+                buygame(j)
                 return
             else:
                 ask2=input("do you want to continue browsing(y/n)")
@@ -354,7 +366,7 @@ def searchgame():
         else:
             ask3=input("do you want to buy a game?")
             if ask3.lower()== "y":
-                buygame()
+                buygame("ringo")
                 return
             else:
                 select_function()
@@ -371,6 +383,7 @@ def aboutgame(a=None):
     else:
         cur.execute("select * from games where gameno=%s",(a,))
         adk=cur.fetchone()
+        
         bum=tb([adk],headers=["gameno", 
                 "game_name", 
                 "platform",
@@ -393,7 +406,7 @@ def addmoney(accno=None):
         nl=cur.fetchone()
         if nl:
             acc=nl[0]
-            addmoney(acc)
+            addmoney(accno=acc)
             return
         else:
             print("please login to add money")
@@ -426,3 +439,49 @@ def exit():
     cuc.close()
     entry()
     return
+def abtacc():
+    cuc,cur=connection_db1()
+    cur.execute("select * from cur_cus")
+    abba=cur.fetchone()
+    if abba:
+        print(tb([abba], headers=['accid ','name','email', 'pwd' ,'wallet'], tablefmt="fancy_grid"))
+        ker=[["1) add money"],
+             ["2)change password"],
+             ["3)change email"],
+             ["4)exit"]]
+        print("choose an option: ")
+        print(tb(ker,headers=["options"],tablefmt="fancy_grid"))
+        ask=int(input("enter option"))
+        while True:
+            if ask == 1:
+                addmoney(abba[0])
+                return
+            elif ask == 2:
+                newpwd=input("enter new password")
+                cur.execute("update customerid set pwd=%s where accid=%s",(newpwd,abba[0]))
+                cur.execute("update cur_cus set pwd=%s where accid=%s",(newpwd,abba[0]))
+                cuc.commit()
+                print("password changed successfully")
+                cur.close()
+                cuc.close()
+                return
+            elif ask == 3:
+                newemail=input("enter new email")
+                cur.execute("update customerid set email=%s where accid=%s",(newemail,abba[0]))
+                cur.execute("update cur_cus set email=%s where accid=%s",(newemail,abba[0]))
+                cuc.commit()
+                print("email changed successfully")
+                cur.close()
+                cuc.close()
+                return
+            elif ask == 4:
+                cur.close()
+                cuc.close()
+                return
+            else:
+                print("invalid option")
+    else:
+        print("please login to see account details")
+        logincustomer()
+        return
+
