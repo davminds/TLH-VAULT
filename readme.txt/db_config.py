@@ -1,9 +1,9 @@
 import mysql.connector as mysql
 a=""
-def intialize_db():
+
+def intialize_db(b):
     global a
-    a=input("Enter your mysql password: ")
-    cuc=mysql.connect(host="localhost",user="root",password=a)
+    cuc=mysql.connect(host="localhost",user="root",password=b)
     cur=cuc.cursor()
         
     cur.execute("create database if not exists customertools")
@@ -55,7 +55,7 @@ def intialize_db():
                 store_revenue int,
                 
                 total_revenue int)""")
-    cur.execute(" insert ignore into store_acc values('store_01','Minds@2009',100000,0,0)")
+    cur.execute(" insert ignore into store_acc values('store_01','Minds@2009',100000,0)")
     cur.execute("""create table if not exists employee_id
                 (Employee_no varchar(10) primary key,
                 employee_name varchar(100),
@@ -76,12 +76,15 @@ def intialize_db():
     cuc.commit()
     cur.close()
     cuc.close()
+    a=b
+    
     
 def connection_db1(b="customertools"):
     
     cuc=mysql.connect(host="localhost",user="root",password=a,database=b)
     cur=cuc.cursor()
     return cuc,cur
+
     
 
     
