@@ -3,6 +3,7 @@ from tabulate import tabulate as tb
 import random as r
 import string as s 
 from db_config import connection_db1
+import maskpass as mp
 
 header=["gameno","game_name","price"]
 
@@ -36,7 +37,7 @@ def create_account():
                 print("valid email id")
                 break
         
-        password = input("Enter your password: ")
+        password = mp.askpass(prompt="Enter your password: ", mask="*")
         query = "INSERT INTO CUSTOMERID (accid, name, email, pwd, wallet) VALUES (%s, %s, %s, %s, 0);"
         cur.execute(query, (accno, name, email, password))
         
@@ -48,6 +49,7 @@ def create_account():
         
         cuc.commit()
         print("Account created successfully!")
+        
         
     finally:
         
@@ -82,20 +84,24 @@ def logincustomer():
         bu=cur.fetchall()
         l = [i[0] for i in bu]
         if acc_en in l:
-            pwd_en=input("enter password: ")
+            pwd_en=mp.askpass(prompt="enter password: ", mask="*").strip()
             cur.execute("select pwd from customerid where email = %s",(acc_en,))
             pwd=cur.fetchone()[0]
-            pwd=pwd_en.strip()
+            
             if pwd_en != pwd:
                 print("incorrect password")
                 for i in range(3):
-                    pwd_en=input("enter password: ")
+                    pwd_en=mp.askpass(prompt="enter password: ", mask="*")
                     if pwd_en == pwd:
                         print("correct password")
+                        break
                     else:
                         print("incorrect password")
-                        pwd_en=input("enter password: ")
-                return
+                        pwd_en=mp.askpass(prompt="enter password: ", mask="*")
+                else:
+                    print("too many incorrect attempts, please try again later")
+                    
+                
             query="select * from customerid where email = %s and pwd = %s"
             febin=(acc_en,pwd_en)
             cur.execute(query,febin)
@@ -108,6 +114,7 @@ def logincustomer():
                 select_function()
                 
                 
+                
                 return "done",acc_en
             
         else:
@@ -117,9 +124,7 @@ def logincustomer():
                 return
                 
                 
-            else:
-                select_function()
-                return
+            
     cur.close()
     cuc.close()
 def select_function():
@@ -141,26 +146,40 @@ def select_function():
         
     while True:
         
+            
         print(tb(functions,headers=["function"],tablefmt="fancy_grid"))
         ask=int(input("what function would you like to use (enter nos): "))
         try:
             try:
                 if ask == 1:
                     logincustomer()
+                    return
                 elif ask == 2:
                     buygame()
+                    return
                 elif ask == 3:
                     sellgame()
+                    return
                 elif ask == 4:
-                    exit()
+                    
+                    cur.execute("delete from cur_cus")
+                    cuc.commit()
+                    cur.close()
+                    cuc.close()
+                    print("thank you for visiting us")
+                    return
                 elif ask == 5:
                     create_account()
+                    return
                 elif ask == 6:
                     searchgame()
+                    return
                 elif ask == 7:
                     addmoney()
+                    return
                 elif ask == 8:
                     abtacc()
+                    return
                 else:
                     print("please choose a valid option")
             except ValueError:
@@ -175,6 +194,7 @@ def select_function():
             cuc.close()
             select_function()
             return
+        
     
 
     
@@ -187,11 +207,13 @@ def buygame(a=None):
         cur.execute("select gameno, game_name,price  from games order by gameno")
         ab=cur.fetchall()
         print(tb(ab,headers=header,tablefmt="fancy_grid"))
-        ask=input("enter game no: ")
-    if a=="ringo":
-        ask=input("enter game no: ")
+        ask=int(input("enter game no: "))
+        
+    elif a=="ringo":
+        ask=int(input("enter game no: "))
+        
     else:
-        ask=a
+        ask=int(a)
     cur.execute("select gameno,game_name,price from games where gameno= %s",(ask,))
     mdv=cur.fetchone()
     if mdv: # game found
@@ -231,6 +253,7 @@ def buygame(a=None):
                                 t_date from transactions where t_id = %s """,(ayaan,))
                     abva=cur.fetchone()
                     print(tb([abva],headers=["t_id","buyer_id","seller_id","product_no","product_name","price","t_date"],tablefmt="fancy_grid"))
+                    select_function()
                     return
                 else:
                     print("insuffient funds please add money")   
@@ -323,8 +346,11 @@ def sellgame():
         nfz=cur.fetchone()
         
         print(tb([nfz],headers=["t_id","buyer_id","seller_id","product_no","product_name","price","t_date"],tablefmt="fancy_grid"))
+        select_function()
+        return
     cur.close()
     cuc.close()
+    
 def searchgame():
     cuc,cur=connection_db1()
     try:
@@ -425,15 +451,7 @@ def addmoney(accno=None):
         select_function()
         return
     
-def exit():
-    from ENTRY import entry
-    cuc,cur= connection_db1()
-    cur.execute("delete from cur_cus")
-    cuc.commit()
-    cur.close()
-    cuc.close()
-    entry()
-    return
+
 def abtacc():
     cuc,cur=connection_db1()
     cur.execute("select * from cur_cus")
@@ -459,6 +477,7 @@ def abtacc():
                 print("password changed successfully")
                 cur.close()
                 cuc.close()
+                select_function()
                 return
             elif ask == 3:
                 newemail=input("enter new email: ")
@@ -468,10 +487,12 @@ def abtacc():
                 print("email changed successfully")
                 cur.close()
                 cuc.close()
+                select_function()
                 return
             elif ask == 4:
                 cur.close()
                 cuc.close()
+                select_function()
                 return
             else:
                 print("invalid option")
@@ -479,5 +500,3 @@ def abtacc():
         print("please login to see account details")
         logincustomer()
         return
-
-
