@@ -2,6 +2,7 @@ from db_config import connection_db1 as con
 from admins import selad as selad
 
 from tabulate import tabulate as tb
+import maskpass as mp
 
 
 def emp_login():
@@ -19,11 +20,13 @@ def emp_login():
             
             if bs and ask == bs[0]:
                 for _ in range(3):
-                    pwd = input("Enter store password: ")
+                    pwd = mp.askpass(prompt="Enter store password: ", mask="*")
                     if pwd == bs[1]:
                         print("Welcome Admin!")
-                        selad()
-                        return
+                        a=selad()
+                        if a=="exit":
+                            return
+                        
                     print("Incorrect password, try again.")
                 print("Too many failed password attempts.")
                 return
@@ -31,7 +34,7 @@ def emp_login():
             elif ask in emp_dict:
                 emp_pwd, emp_name = emp_dict[ask]
                 for _ in range(3):
-                    pwd = input("Enter employee password: ")
+                    pwd = mp.askpass(prompt="Enter employee password: ", mask="*")
                     if pwd == emp_pwd:
                         print(f"Welcome {emp_name}!")
                         selemp(ask)
@@ -95,6 +98,7 @@ def addgames(emp_no):
 
 def modifygames(emp_no):
     cuc, cur = con()
+    a = ["gameno", "game_name", "platform", "price", "daterel", "genre", "company"]
     try:
         # Pass False so seeallgames() doesn't prematurely trigger selemp()
         seeallgames(emp_no,route_back=False)
@@ -105,13 +109,35 @@ def modifygames(emp_no):
         
         if count <= len(valid_gamenos):
             for _ in range(count):
-                gno = input("enter game no to modify: ")
-                n_changes = int(input('enter no of changes to be made: '))
+                while True:
+                    try:
+                        gno = int(input("enter game no to modify: "))
+                        n_changes = int(input('enter no of changes to be made: '))
+                        if gno not in a:
+                            print(f"Game number {gno} does not exist. Please try again.")
+                            continue
+                        break  
+                    except ValueError:
+                        print("Invalid input. Please enter a valid integer for game number.")
+                
+                
+                
                 for _ in range(n_changes):
-                    field = input("what do you want to modify (price/game_name/platform/etc): ")
-                    val = input(f"enter new {field}: ")
+                    while True:
+                        
+                            field = input("what do you want to modify (price/game_name/platform/etc): ")
+                            if field in a:
+                                val = input(f"enter new {field}: ")
+                                break
+                            else:
+                                print("invalid field")
+                                
+                        
+                            
+                                   
+                    
                     if field == "price":
-                        val = int(val)
+                            val = int(val)
                     q = f"update games set `{field}` = %s where gameno = %s"
                     cur.execute(q, (val, gno))
                     cuc.commit()
@@ -202,17 +228,16 @@ def editemployee(emp_no):
 
 def selemp(emp_no):
     while True:
-        l = [
-            "1) View Profile", 
-            "2) See All Games", 
-            "3) Add Games", 
-            "4) Modify Games", 
-            "5) Remove Games",
-            "6) Edit Profile", 
-            "7) Report Complaint",
-            "8) Exit"
+        l = [ ["1) View Profile"], 
+            ["2) See All Games"], 
+            ["3) Add Games"], 
+            ["4) Modify Games"], 
+            ["5) Remove Games"],
+            ["6) Edit Profile"], 
+            ["7) Report Complaint"],
+            ["8) Exit"]
         ]
-        print(tb([ [item] for item in l ], headers=["Employee Menu"], tablefmt="fancy_grid"))
+        print(tb(l, headers=["Employee Menu"], tablefmt="fancy_grid"))
         choice = input("Enter your choice (1-8): ")
         
         if choice == "1":
@@ -230,9 +255,6 @@ def selemp(emp_no):
         elif choice == "7":
             reportcomplaint(emp_no)
         elif choice == "8":
-            from ENTRY import entry
-            print("Logging out...")
-            entry()
-            break
+            return  
         else:
             print("Invalid choice. Please enter a number between 1 and 8.")
