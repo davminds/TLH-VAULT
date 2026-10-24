@@ -37,12 +37,13 @@ def emp_login():
                     pwd = mp.askpass(prompt="Enter employee password: ", mask="*")
                     if pwd == emp_pwd:
                         print(f"Welcome {emp_name}!")
-                        selemp(ask)
-                        return ask
+                        q=selemp(ask)
+                        if q=="exit":
+                            return
+                        
                     print("Incorrect password, try again.")
                 print("Too many failed password attempts.")
-                from ENTRY import entry
-                entry()
+                
                 return
                 
             else:
@@ -56,7 +57,7 @@ def emp_login():
         cur.close()
         cuc.close()
 
-def seeallgames(emp_no,route_back=True):
+def seeallgames(emp_no):
     cuc, cur = con()
     try:
         a = ["gameno", "game_name", "platform", "price", "daterel", "genre", "company"]
@@ -66,8 +67,7 @@ def seeallgames(emp_no,route_back=True):
     finally:
         cur.close()
         cuc.close()
-        if route_back:
-            selemp(emp_no)
+        
 
 def addgames(emp_no):
     cuc, cur = con()
@@ -94,7 +94,7 @@ def addgames(emp_no):
     finally:
         cur.close()
         cuc.close()
-    selemp(emp_no)
+    
 
 def modifygames(emp_no):
     cuc, cur = con()
@@ -146,7 +146,7 @@ def modifygames(emp_no):
     finally:
         cur.close()
         cuc.close()
-    selemp(emp_no)
+    
 
 def removegames(emp_no):
     cuc, cur = con()
@@ -162,7 +162,7 @@ def removegames(emp_no):
     finally:
         cur.close()
         cuc.close()
-    selemp(emp_no)
+    
 
 
 def viewid(a):
@@ -177,7 +177,7 @@ def viewid(a):
     finally:
         cur.close()
         cuc.close()
-    selemp(a)
+    
 
 def reportcomplaint(emp_no):
     cuc, cur = con("employeetools")
@@ -191,7 +191,8 @@ def reportcomplaint(emp_no):
     finally:
         cur.close()
         cuc.close()
-    selemp(emp_no)
+    
+    
 def editemployee(emp_no):
     cuc, cur = con("employeetools")
     try:
@@ -255,6 +256,7 @@ def selemp(emp_no):
         elif choice == "7":
             reportcomplaint(emp_no)
         elif choice == "8":
-            return  
+            
+            return "exit"
         else:
             print("Invalid choice. Please enter a number between 1 and 8.")
