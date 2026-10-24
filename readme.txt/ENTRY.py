@@ -32,7 +32,7 @@ def entry():
         ask=int(input("enter your choice: "))
         if ask == 1:
             emp.emp_login()
-            return
+            
         
         elif ask == 2:
             
